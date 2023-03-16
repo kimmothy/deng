@@ -6,25 +6,32 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import somanydeng.deng.api.vo.UserVO;
 
 @Controller("/oauth")
 public class OauthController {
 
     static final String rest_key = "0ba778fad07eee624f652049c09d91ac";
-    static final String redirect_uri = "";
+    static final String redirect_uri = "http://localhost:8080/oauth/kakao";
 
-    @GetMapping("/")
-    public String loginPage(Model model){
+//    @GetMapping("/")
+//    public String loginPage(Model model){
+//
+//    }
 
-    }
-
-    @GetMapping("/kakao")
-    public String kakaoLogin(Model model, @ModelAttribute("code") String code, HttpSession session){
+    @RequestMapping("/kakao")
+    public String kakaoLogin(Model model, HttpServletRequest req, HttpSession session){
+        System.out.println("OauthController.kakaoLogin");
         model.addAttribute("goaway", "goaway");
 
+        String code = req.getParameter("code");
         System.out.println(code+"bbb");
         String url = "https://kauth.kakao.com/oauth/token";
         HashMap<String, Object> paramMap = new HashMap<String, Object>();
@@ -54,14 +61,14 @@ public class OauthController {
         uvo.setNickname(nickname);
         uvo.setThumbnailSrc(thumbnail);
 
-        if(svc.selectUser(id) == null) {
-            svc.insertUser(uvo);
-        } else {
-            svc.updateUser(uvo);
-        }
+//        if(svc.selectUser(id) == null) {
+//            svc.insertUser(uvo);
+//        } else {
+//            svc.updateUser(uvo);
+//        }
 
         session.setAttribute("User", uvo);
-        return "redirect:showmain";
+        return "main";
 
     }
 

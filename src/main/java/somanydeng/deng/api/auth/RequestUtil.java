@@ -1,5 +1,7 @@
 package somanydeng.deng.api.auth;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -107,6 +109,71 @@ public class RequestUtil {
 			e.printStackTrace();
 		}
 		return buffer.toString();
+	}
+
+	public  HashMap<String, Object> sendGetReturnMap(HttpURLConnection conn) {
+		StringBuffer buffer = new StringBuffer();
+		BufferedReader br = null;
+		HashMap<String, Object> responseMap = new HashMap<String, Object>();
+		Gson gson = new Gson();
+		try {
+
+
+			br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String inputLine;
+			while ((inputLine = br.readLine()) != null) {
+				buffer.append(inputLine);
+			}
+
+			responseMap = gson.fromJson(buffer.toString(), responseMap.getClass());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return responseMap;
+	}
+
+
+	public HashMap<String, Object> sendPostReturnMap(HttpURLConnection conn, HashMap<String, Object> paramMap) {
+		StringBuffer buffer = new StringBuffer();
+		BufferedReader br = null;
+		HashMap<String, Object> responseMap = new HashMap<String, Object>();
+		Gson gson = new Gson();
+
+		try {
+
+			//POST :  param을 body에 담아 보낸다. ---------------
+			StringBuffer paramBuffer = new StringBuffer();
+			for (Map.Entry<String,Object> map : paramMap.entrySet()) {
+				if (paramBuffer.length() != 0) paramBuffer.append('&');
+				paramBuffer.append(map.getKey());
+				paramBuffer.append('=');
+				paramBuffer.append(String.valueOf(map.getValue()));
+			}
+			//System.out.println(paramBuffer.toString());
+			byte[] postDataBytes = paramBuffer.toString().getBytes("UTF-8");
+			conn.setRequestProperty( "Content-Length", Integer.toString( postDataBytes.length ));
+			try( DataOutputStream wr = new DataOutputStream( conn.getOutputStream())) {
+				wr.write( postDataBytes );
+			}
+
+			br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String inputLine;
+			while ((inputLine = br.readLine()) != null) {
+				buffer.append(inputLine);
+			}
+
+			responseMap = gson.fromJson(buffer.toString(), responseMap.getClass());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println(buffer.toString());
+		return responseMap;
 	}
 
 	
